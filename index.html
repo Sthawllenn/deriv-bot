@@ -1411,17 +1411,26 @@
 
         // Check for OAuth callback
         window.addEventListener('load', () => {
+            console.log('Page loaded. Current URL:', window.location.href);
+            console.log('OAuth Config:', OAUTH_CONFIG);
+            
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             
             if (code) {
+                console.log('OAuth code found:', code);
                 handleOAuthCallback(code);
             } else {
+                console.log('No OAuth code, checking for stored token...');
                 checkStoredToken();
             }
             
             // Initialize charts after DOM is ready
             setTimeout(initCharts, 100);
+            
+            // Add debug info
+            console.log('Bot initialized. App ID:', OAUTH_CONFIG.app_id);
+            console.log('Redirect URI:', OAUTH_CONFIG.redirect_uri);
         });
 
         async function handleOAuthCallback(code) {
