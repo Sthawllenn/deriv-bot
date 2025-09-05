@@ -889,14 +889,11 @@
     <script>
         // OAuth Configuration
         const OAUTH_CONFIG = {
-            app_id: '1089', // TODO: Replace with your actual app_id from Deriv
+            app_id: '63468', // Your Deriv OAuth app_id
             oauth_url: 'https://oauth.deriv.com/oauth2/authorize',
             redirect_uri: window.location.origin + window.location.pathname,
             ws_url: 'wss://ws.derivws.com/websockets/v3'
         };
-        
-        // IMPORTANT: Update app_id above with your actual app_id from Deriv
-        // Get it from: https://app.deriv.com/account/api-token
 
         // Bot State
         let ws = null;
