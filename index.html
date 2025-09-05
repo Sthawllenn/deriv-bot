@@ -1836,9 +1836,11 @@
         document.getElementById('stopLoss')?.addEventListener('input', updateRiskAssessment);
 
         // Backtest Function
-        backtestBtn.addEventListener('click', () => {
-            runBacktest();
-        });
+        if (backtestBtn) {
+            backtestBtn.addEventListener('click', () => {
+                runBacktest();
+            });
+        }
 
         function runBacktest() {
             const trials = 1000;
