@@ -1166,7 +1166,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toFixed(2);
+                                    return ' + value.toFixed(2);
                                 }
                             }
                         }
@@ -1206,45 +1206,63 @@
         }
 
         // Tab Switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const tabContent = document.getElementById(`${tab.dataset.tab}-tab`);
+                    if (tabContent) tabContent.classList.add('active');
+                });
             });
-        });
 
-        // Strategy Selection
-        document.querySelectorAll('.strategy-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                activeStrategy = card.dataset.strategy;
-                document.getElementById('activeStrategy').textContent = card.querySelector('h4').textContent;
-                
-                // Show/hide strategy-specific settings
-                document.getElementById('martingaleSettings').classList.toggle('hidden', 
-                    !['martingale', 'anti-martingale'].includes(activeStrategy));
-                document.getElementById('patternSettings').classList.toggle('hidden', 
-                    activeStrategy !== 'pattern');
-                document.getElementById('digitSelection').classList.toggle('hidden',
-                    !['manual', 'martingale', 'anti-martingale'].includes(activeStrategy));
+            // Strategy Selection
+            document.querySelectorAll('.strategy-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    activeStrategy = card.dataset.strategy;
+                    const strategyName = card.querySelector('h4');
+                    if (strategyName) {
+                        const activeStrategyEl = document.getElementById('activeStrategy');
+                        if (activeStrategyEl) activeStrategyEl.textContent = strategyName.textContent;
+                    }
+                    
+                    // Show/hide strategy-specific settings
+                    const martingaleSettings = document.getElementById('martingaleSettings');
+                    const patternSettings = document.getElementById('patternSettings');
+                    const digitSelection = document.getElementById('digitSelection');
+                    
+                    if (martingaleSettings) {
+                        martingaleSettings.classList.toggle('hidden', 
+                            !['martingale', 'anti-martingale'].includes(activeStrategy));
+                    }
+                    if (patternSettings) {
+                        patternSettings.classList.toggle('hidden', 
+                            activeStrategy !== 'pattern');
+                    }
+                    if (digitSelection) {
+                        digitSelection.classList.toggle('hidden',
+                            !['manual', 'martingale', 'anti-martingale'].includes(activeStrategy));
+                    }
+                });
             });
-        });
 
-        // Digit Selection
-        document.querySelectorAll('.digit-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const digit = btn.dataset.digit;
-                if (selectedDigits.has(digit)) {
-                    selectedDigits.delete(digit);
-                    btn.classList.remove('selected');
-                } else {
-                    selectedDigits.add(digit);
-                    btn.classList.add('selected');
-                }
+            // Digit Selection
+            document.querySelectorAll('.digit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const digit = btn.dataset.digit;
+                    if (selectedDigits.has(digit)) {
+                        selectedDigits.delete(digit);
+                        btn.classList.remove('selected');
+                    } else {
+                        selectedDigits.add(digit);
+                        btn.classList.add('selected');
+                    }
+                });
             });
         });
 
@@ -1416,9 +1434,18 @@
             
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            
+            // Check for OAuth errors
+            if (error) {
+                console.error('OAuth error:', error);
+                alert('Authorization failed: ' + error);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
             
             if (code) {
-                console.log('OAuth code found:', code);
+                console.log('OAuth code found, processing...');
                 handleOAuthCallback(code);
             } else {
                 console.log('No OAuth code, checking for stored token...');
@@ -1431,6 +1458,19 @@
             // Add debug info
             console.log('Bot initialized. App ID:', OAUTH_CONFIG.app_id);
             console.log('Redirect URI:', OAUTH_CONFIG.redirect_uri);
+            
+            // Add clear cache button handler
+            const clearAuthBtn = document.getElementById('clearAuthBtn');
+            if (clearAuthBtn) {
+                clearAuthBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('deriv_access_token');
+                    localStorage.removeItem('deriv_auth_time');
+                    sessionStorage.removeItem('oauth_state');
+                    alert('Authentication cache cleared. You can now sign in again.');
+                    window.location.reload();
+                });
+            }
         });
 
         async function handleOAuthCallback(code) {
