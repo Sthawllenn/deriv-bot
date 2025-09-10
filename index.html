@@ -889,7 +889,7 @@
     <script>
         // OAuth Configuration
         const OAUTH_CONFIG = {
-            app_id: '99449', // Your Deriv OAuth app_id
+            app_id: '100314', // Your Deriv OAuth app_id
             oauth_url: 'https://oauth.deriv.com/oauth2/authorize',
             redirect_uri: window.location.origin + window.location.pathname,
             ws_url: 'wss://ws.derivws.com/websockets/v3'
@@ -1469,6 +1469,25 @@
                     sessionStorage.removeItem('oauth_state');
                     alert('Authentication cache cleared. You can now sign in again.');
                     window.location.reload();
+                });
+            }
+            
+            // Add token login option
+            const useTokenBtn = document.getElementById('useTokenBtn');
+            if (useTokenBtn) {
+                useTokenBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const token = prompt('Enter your Deriv API Token:\n\n' +
+                        '1. Go to https://app.deriv.com/account/api-token\n' +
+                        '2. Create a token with all permissions\n' +
+                        '3. Copy and paste it here');
+                    
+                    if (token && token.trim()) {
+                        accessToken = token.trim();
+                        localStorage.setItem('deriv_access_token', accessToken);
+                        localStorage.setItem('deriv_auth_time', Date.now().toString());
+                        connectWithToken(accessToken);
+                    }
                 });
             }
         });
